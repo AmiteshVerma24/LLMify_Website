@@ -20,7 +20,7 @@ function Page() {
                 </p>
                 <WaitListForm />
             </div>
-            <div>
+            <div className='absolute bottom-4'>
                 <div className='flex flex-col text-sm justify-center items-center space-x-2'>
                     <p className='text-[#a1a09f]'>Boost your productivity with every click.</p>
                     <p className='text-[#a1a09f]'>Crafted by <span className='text-white underline'>@amitesh</span></p>

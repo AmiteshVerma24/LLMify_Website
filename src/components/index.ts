@@ -4,9 +4,10 @@ import { NavBar } from "./global/Navbar";
 // Hero
 import { Hero } from "./homepage/Hero";
 
+
 export { 
     WaitListForm,
     SocialCard,
     NavBar,
-    Hero
+    Hero,
 };
