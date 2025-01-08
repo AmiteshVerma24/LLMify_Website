@@ -92,7 +92,7 @@ export function MagicCard({
       ref={cardRef}
       className={cn("group relative flex size-full rounded-xl", className)}
     >
-      <div className="z-30 w-full flex flex-col justify-between items-center h-screen">
+      <div className="z-30 w-full flex flex-col justify-center items-center h-screen">
         {children}
       </div>
       {/* Gradient Effect */}
