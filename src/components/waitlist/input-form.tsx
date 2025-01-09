@@ -3,14 +3,23 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Mail, User } from "lucide-react";
 import { useState } from "react";
+import { WaitingListPopup } from "./waitlist-popup";
+import { saveToWaitlist } from "@/api/waitlist";
 
 export function WaitListForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault(); // Prevent default form submission
-    alert(`Name: ${name}\nEmail: ${email}`);
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    // Handle backend logic here
+    const response = await saveToWaitlist(name, email);
+    if (response.success) setIsOpen(true);
+  };
+
+  const closePopup = () => {
+    setIsOpen(false);
   };
 
   return (
@@ -66,6 +75,7 @@ export function WaitListForm() {
           </span>
         </Button>
       </form>
+      <WaitingListPopup isOpen={isOpen} onClose={closePopup} />
     </div>
   );
 }
