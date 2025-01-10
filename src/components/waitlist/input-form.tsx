@@ -4,22 +4,33 @@ import { Button } from "@/components/ui/button";
 import { Mail, User } from "lucide-react";
 import { useState } from "react";
 import { WaitingListPopup } from "./waitlist-popup";
+import { WaitingListFailurePopup } from "./waitlist-fail-popup";
 import { saveToWaitlist } from "@/api/waitlist";
 
 export function WaitListForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
+  const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false);
+  const [isFailPopupOpen, setisFailPopupOpen] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    // Handle backend logic here
+    if (!name || !email) {
+      setisFailPopupOpen(true);
+      return;
+    }
     const response = await saveToWaitlist(name, email);
-    if (response.success) setIsOpen(true);
+    if (response.success) setIsSuccessPopupOpen(true);
+    setName("");
+    setEmail("");
   };
 
   const closePopup = () => {
-    setIsOpen(false);
+    setIsSuccessPopupOpen(false);
+  };
+
+  const closeFailurePopup = () => {
+    setisFailPopupOpen(false);
   };
 
   return (
@@ -75,7 +86,8 @@ export function WaitListForm() {
           </span>
         </Button>
       </form>
-      <WaitingListPopup isOpen={isOpen} onClose={closePopup} />
+      <WaitingListPopup isOpen={isSuccessPopupOpen} onClose={closePopup} />
+      <WaitingListFailurePopup isOpen={isFailPopupOpen} onClose={closeFailurePopup} message="Please fill all the details"/>
     </div>
   );
 }
