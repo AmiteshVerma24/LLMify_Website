@@ -2,6 +2,7 @@
 import React from 'react'
 import { useState } from "react";
 import { MagicCard } from '../ui/magic-card';
+import HeroVideoDialog from '../ui/hero-video-dialog';
 
 export function FeatureSection() {
   return (
@@ -19,9 +20,7 @@ function FeatureSectionHeader () {
           Experience Smarter Browsing, <br /> One Click at a Time.
         </h1>
         <p className="text-lg sm:text-xl mt-4 text-gray-300">
-            Highlight, annotate, summarize, and engage in real-time chat—all 
-            seamlessly powered by advanced AI. Revolutionize the way you interact
-             with websites, capture key information, and never miss a detail again.
+        Highlight, take notes, and unlock AI-powered insights—all in one Chrome extension. Boost your productivity and make every click smarter!
         </p>
         
       </div>
@@ -36,28 +35,28 @@ function FeatureSectionContent () {
       title: "Highlight and Persist Text",
       description:
         "Easily highlight text on any website and save it for future reference. Your highlights will always be there, even when you return later.",
-      videoSrc: "/videos/video1.mov", // Replace with your video file path
+      videoSrc: "https://www.youtube.com/embed/npofYu_0NqU", // Replace with your video file path
     },
     {
       id: 2,
       title: "Take and Manage Notes",
       description:
         "Take notes directly from any website, view them later, and edit with ease. Keep your ideas organized in one place.",
-      videoSrc: "/videos/video2.mov", // Replace with your video file path
+      videoSrc: "https://www.youtube.com/embed/npofYu_0NqU",
     },
     {
       id: 3,
       title: "Explain Text with AI",
       description:
         "Chat with AI based on the current context of the website. Get insights, suggestions, or even answers tailored to what you're viewing.",
-      videoSrc: "/videos/video1.mov", // Replace with your video file path
+      videoSrc: "https://www.youtube.com/embed/npofYu_0NqU",
     },
     {
       id: 4,
       title: "AI Chat for Contextual Assistance",
       description:
         "Simply drag your zooms on the timeline. All the heavy lifting is done automatically. No manual work is required.",
-      videoSrc: "/videos/video2.mov", // Replace with your video file path
+      videoSrc: "https://www.youtube.com/embed/npofYu_0NqU",
     },
   ];
 
@@ -88,9 +87,9 @@ function FeatureSectionContent () {
       </div>
 
       {/* Right Section */}
-      <div className="w-3/5 flex items-center justify-center">
+      {/* <div className="w-3/5 flex items-center justify-center">
         <video
-          key={selectedFeature.videoSrc} // Re-render video on source change
+          key={selectedFeature.videoSrc}
           src={selectedFeature.videoSrc}
           className="rounded-lg shadow-lg"
           autoPlay
@@ -98,7 +97,23 @@ function FeatureSectionContent () {
           muted
           controls={false}
         />
-      </div>
+      </div> */}
+      <div className="relative w-3/5 flex items-center justify-center">
+        <HeroVideoDialog
+          className="dark:hidden block"
+          animationStyle="top-in-bottom-out"
+          videoSrc={selectedFeature.videoSrc}
+          thumbnailSrc="https://startup-template-sage.vercel.app/hero-light.png"
+          thumbnailAlt="Hero Video"
+        />
+        <HeroVideoDialog
+          className="hidden dark:block"
+          animationStyle="top-in-bottom-out"
+          videoSrc={selectedFeature.videoSrc}
+          thumbnailSrc="https://startup-template-sage.vercel.app/hero-dark.png"
+          thumbnailAlt="Hero Video"
+        />
+    </div>
     </div>
   );
 }
