@@ -3,18 +3,64 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Mail, User } from "lucide-react";
 import { useState } from "react";
+import { WaitingListPopup } from "./waitlist-popup";
+import { WaitingListFailurePopup } from "./waitlist-fail-popup";
+import { saveToWaitlist } from "@/api/waitlist";
 
 export function WaitListForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false);
+  const [isFailPopupOpen, setisFailPopupOpen] = useState(false);
+  const [error, setError] = useState<string>("");
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault(); // Prevent default form submission
-    alert(`Name: ${name}\nEmail: ${email}`);
+  const validateForm = (): boolean => {
+    if (!name.trim()) {
+      setError("Name is required.");
+      return false;
+    }
+    if (!email.trim()) {
+      setError("Email is required.");
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address.");
+      return false;
+    }
+    setError(""); // Clear any previous errors
+    return true;
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!validateForm()) {
+      setisFailPopupOpen(true);
+      return;
+    }
+    try {
+      const response = await saveToWaitlist(name, email);
+      if (response.success) {
+        setIsSuccessPopupOpen(true);
+        setName("");
+        setEmail("");
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+      setisFailPopupOpen(true);
+    }
+  };
+
+  const closePopup = () => {
+    setIsSuccessPopupOpen(false);
+  };
+
+  const closeFailurePopup = () => {
+    setisFailPopupOpen(false);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center text-white bg-transparent"> 
+    <div className="flex flex-col items-center justify-center text-white bg-transparent">
       <form className="w-full max-w-sm space-y-4" onSubmit={handleSubmit}>
         {/* Name Field */}
         <div className="relative">
@@ -44,6 +90,11 @@ export function WaitListForm() {
           />
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <p className="text-red-500 text-sm text-center mt-2">{error}</p>
+        )}
+
         {/* Continue Button */}
         <Button
           type="submit"
@@ -66,6 +117,12 @@ export function WaitListForm() {
           </span>
         </Button>
       </form>
+      <WaitingListPopup isOpen={isSuccessPopupOpen} onClose={closePopup} />
+      <WaitingListFailurePopup
+        isOpen={isFailPopupOpen}
+        onClose={closeFailurePopup}
+        message={error || "Please fill all the details"}
+      />
     </div>
   );
 }

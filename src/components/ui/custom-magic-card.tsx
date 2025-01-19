@@ -11,10 +11,6 @@ interface MagicCardProps extends React.HTMLAttributes<HTMLDivElement> {
   number?: number;
 }
 
-interface MeteorsProps {
-  number?: number;
-}
-
 export function MagicCard({
   children,
   className,
@@ -43,16 +39,11 @@ export function MagicCard({
     [mouseX, mouseY],
   );
 
-  const handleMouseOut = useCallback(
-    (e: MouseEvent) => {
-      if (!e.relatedTarget) {
-        document.removeEventListener("mousemove", handleMouseMove);
-        mouseX.set(-gradientSize);
-        mouseY.set(-gradientSize);
-      }
-    },
-    [handleMouseMove, mouseX, gradientSize, mouseY],
-  );
+  const handleMouseOut = useCallback(() => {
+    document.removeEventListener("mousemove", handleMouseMove);
+    mouseX.set(-gradientSize);
+    mouseY.set(-gradientSize);
+  }, [handleMouseMove, mouseX, gradientSize, mouseY]);
 
   const handleMouseEnter = useCallback(() => {
     document.addEventListener("mousemove", handleMouseMove);
@@ -61,28 +52,11 @@ export function MagicCard({
   }, [handleMouseMove, mouseX, gradientSize, mouseY]);
 
   useEffect(() => {
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseout", handleMouseOut);
-    document.addEventListener("mouseenter", handleMouseEnter);
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseout", handleMouseOut);
-      document.removeEventListener("mouseenter", handleMouseEnter);
-    };
-  }, [handleMouseEnter, handleMouseMove, handleMouseOut]);
-
-  useEffect(() => {
-    mouseX.set(-gradientSize);
-    mouseY.set(-gradientSize);
-  }, [gradientSize, mouseX, mouseY]);
-
-  useEffect(() => {
-    const styles = [...new Array(number)].map(() => ({
+    const styles = Array.from({ length: number }, () => ({
       top: -5,
-      left: Math.floor(Math.random() * window.innerWidth) + "px",
-      animationDelay: Math.random() * 1 + 0.2 + "s",
-      animationDuration: Math.floor(Math.random() * 8 + 2) + "s",
+      left: `${Math.floor(Math.random() * window.innerWidth)}px`,
+      animationDelay: `${Math.random() * 1 + 0.2}s`,
+      animationDuration: `${Math.floor(Math.random() * 8 + 2)}s`,
     }));
     setMeteorStyles(styles);
   }, [number]);
@@ -90,14 +64,21 @@ export function MagicCard({
   return (
     <div
       ref={cardRef}
-      className={cn("group relative flex size-full rounded-xl", className)}
+      className={cn(
+        "group relative flex w-full h-screen rounded-xl bg-transparent",
+        className,
+      )}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseOut}
     >
-      <div className="z-30 w-full flex flex-col justify-center items-center h-screen">
+      {/* Content */}
+      <div className="z-30 w-full h-full flex flex-col justify-center items-center px-4 sm:px-8 lg:px-16">
         {children}
       </div>
+
       {/* Gradient Effect */}
       <motion.div
-        className="pointer-events-none absolute inset-px z-10 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        className="pointer-events-none absolute inset-0 z-10 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
           background: useMotionTemplate`
             radial-gradient(${gradientSize}px circle at ${mouseX}px ${mouseY}px, ${gradientColor}, transparent 100%)
@@ -105,12 +86,13 @@ export function MagicCard({
           opacity: gradientOpacity,
         }}
       />
+
       {/* Meteors */}
-      {[...meteorStyles].map((style, idx) => (
+      {meteorStyles.map((style, idx) => (
         <span
           key={idx}
           className={cn(
-            "pointer-events-none absolute left-1/2 top-1/2 size-0.5 rotate-[215deg] animate-meteor rounded-full bg-slate-500 shadow-[0_0_0_1px_#ffffff10]",
+            "pointer-events-none absolute h-1 w-1 rounded-full bg-slate-500 shadow-[0_0_0_1px_#ffffff10] rotate-[215deg] animate-meteor",
           )}
           style={style}
         >

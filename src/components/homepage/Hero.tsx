@@ -8,7 +8,7 @@ import React from 'react'
 export function Hero() {
   return (
     <MagicCard
-            className="cursor-pointer shadow-2xl"
+            className="cursor-pointer shadow-2xl justify-center"
             gradientColor={"#262626"}
     >
         <div className='flex flex-col justify-center items-center space-y-16 '>
