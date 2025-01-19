@@ -1,8 +1,9 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-interface RainbowButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
-
+interface RainbowButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  className?: string; // Explicitly typing the className
+  children: React.ReactNode; // Explicitly typing children
+}
 export function RainbowButton({
   children,
   className,

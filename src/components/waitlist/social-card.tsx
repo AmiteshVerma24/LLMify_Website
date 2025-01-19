@@ -2,14 +2,12 @@
 import { ReactElement } from "react";
 
 interface SocialCardProps {
-  platform: string; 
   username: string; 
   icon: ReactElement; 
   bgColor?: string; 
 }
 
 export function SocialCard({
-  platform,
   username,
   icon,
   bgColor = "bg-gray-900", 

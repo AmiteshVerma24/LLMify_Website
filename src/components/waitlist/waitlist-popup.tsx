@@ -39,10 +39,10 @@ interface WaitingListPopupProps {
             </div>
             {/* Main text */}
             <h2 className="text-2xl font-semibold text-center">
-              We've added you to our waiting list!
+              We&apos;ve added you to our waiting list!
             </h2>
             <p className="text-center text-gray-400">
-              We’ll let you know when SmartSnip is ready.
+              We&apos;ll let you know when SmartSnip is ready.
             </p>
           </div>
         </div>
