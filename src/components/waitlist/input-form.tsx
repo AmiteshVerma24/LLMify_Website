@@ -12,17 +12,43 @@ export function WaitListForm() {
   const [email, setEmail] = useState("");
   const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false);
   const [isFailPopupOpen, setisFailPopupOpen] = useState(false);
+  const [error, setError] = useState<string>("");
+
+  const validateForm = (): boolean => {
+    if (!name.trim()) {
+      setError("Name is required.");
+      return false;
+    }
+    if (!email.trim()) {
+      setError("Email is required.");
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address.");
+      return false;
+    }
+    setError(""); // Clear any previous errors
+    return true;
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!name || !email) {
+    if (!validateForm()) {
       setisFailPopupOpen(true);
       return;
     }
-    const response = await saveToWaitlist(name, email);
-    if (response.success) setIsSuccessPopupOpen(true);
-    setName("");
-    setEmail("");
+    try {
+      const response = await saveToWaitlist(name, email);
+      if (response.success) {
+        setIsSuccessPopupOpen(true);
+        setName("");
+        setEmail("");
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+      setisFailPopupOpen(true);
+    }
   };
 
   const closePopup = () => {
@@ -34,7 +60,7 @@ export function WaitListForm() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center text-white bg-transparent"> 
+    <div className="flex flex-col items-center justify-center text-white bg-transparent">
       <form className="w-full max-w-sm space-y-4" onSubmit={handleSubmit}>
         {/* Name Field */}
         <div className="relative">
@@ -64,6 +90,11 @@ export function WaitListForm() {
           />
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <p className="text-red-500 text-sm text-center mt-2">{error}</p>
+        )}
+
         {/* Continue Button */}
         <Button
           type="submit"
@@ -87,7 +118,11 @@ export function WaitListForm() {
         </Button>
       </form>
       <WaitingListPopup isOpen={isSuccessPopupOpen} onClose={closePopup} />
-      <WaitingListFailurePopup isOpen={isFailPopupOpen} onClose={closeFailurePopup} message="Please fill all the details"/>
+      <WaitingListFailurePopup
+        isOpen={isFailPopupOpen}
+        onClose={closeFailurePopup}
+        message={error || "Please fill all the details"}
+      />
     </div>
   );
 }
