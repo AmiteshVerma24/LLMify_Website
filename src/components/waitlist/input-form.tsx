@@ -28,7 +28,7 @@ export function WaitListForm() {
       setError("Please enter a valid email address.");
       return false;
     }
-    setError(""); // Clear any previous errors
+    setError(""); 
     return true;
   };
 
