@@ -5,7 +5,7 @@ import { Mail, User } from "lucide-react";
 import { useState } from "react";
 import { WaitingListPopup } from "./waitlist-popup";
 import { WaitingListFailurePopup } from "./waitlist-fail-popup";
-import { saveToWaitlist } from "@/api/waitlist";
+// import { saveToWaitlist } from "@/api/waitlist";
 
 export function WaitListForm() {
   const [name, setName] = useState("");
@@ -38,17 +38,17 @@ export function WaitListForm() {
       setisFailPopupOpen(true);
       return;
     }
-    try {
-      const response = await saveToWaitlist(name, email);
-      if (response.success) {
-        setIsSuccessPopupOpen(true);
-        setName("");
-        setEmail("");
-      }
-    } catch (err) {
-      setError("An error occurred. Please try again." + err);
-      setisFailPopupOpen(true);
-    }
+    // try {
+    //   const response = await saveToWaitlist(name, email);
+    //   if (response.success) {
+    //     setIsSuccessPopupOpen(true);
+    //     setName("");
+    //     setEmail("");
+    //   }
+    // } catch (err) {
+    //   setError("An error occurred. Please try again." + err);
+    //   setisFailPopupOpen(true);
+    // }
   };
 
   const closePopup = () => {
