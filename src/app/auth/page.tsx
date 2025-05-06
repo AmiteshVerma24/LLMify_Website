@@ -4,6 +4,7 @@ import React from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import authService from '@/services/authService';
 
 export default function Auth() {
   const { data: session, status } = useSession();
@@ -27,21 +28,25 @@ export default function Auth() {
   
   // Send message to extension when authenticated
   useEffect(() => {
+    const authData = {
+      type: "AUTH_SUCCESS",
+      user: session?.user,
+      accessToken: session?.accessToken,
+      refreshToken: session?.refreshToken,
+      provider: session?.provider,
+      providerId: session?.providerId,
+      
+      timestamp: Date.now()
+    };
+    console.log("Auth data:", authData);
     if (session && session.user) {
       try {
         // Method 1: Try direct communication with extension API
         if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
           console.log("Attempting direct chrome.runtime.sendMessage");
-          
           chrome.runtime.sendMessage(
             extensionId,
-            { 
-              type: "AUTH_SUCCESS", 
-              session: {
-                user: session.user,
-                accessToken: "dummy-token"
-              }
-            },
+            authData,
             (response) => {
               if (chrome.runtime.lastError) {
                 console.error("Extension messaging error:", chrome.runtime.lastError);
@@ -69,14 +74,6 @@ export default function Auth() {
     
     function sendViaPostMessage() {
       try {
-        // Method 2: Use postMessage as backup
-        const authData = {
-          type: "AUTH_SUCCESS",
-          user: session?.user,
-          token:  "dummy-token",
-          timestamp: Date.now()
-        };
-        
         // Store in localStorage for potential retrieval by the extension
         localStorage.setItem("extensionAuthData", JSON.stringify(authData));
         

@@ -1,6 +1,7 @@
-// src/config/apiConfig.js
-export const API_BASE_URL = "http://localhost:3000/api"; 
+export const API_BASE_URL = "http://localhost:5050"; 
 
-export const endpoints = {
-  addUserToWaitlist: `${API_BASE_URL}/waitlist/add-to-waitlist`,
-};
+export const AUTH_ENDPOINTS = {
+  SIGNUP: "/users/signup",
+  EXISTS: "/users/exists",
+  UPDATE: "/users/update",
+}

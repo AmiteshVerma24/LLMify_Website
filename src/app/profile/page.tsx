@@ -30,6 +30,11 @@ export default async function Profile() {
               <h2>{session.user.name}</h2>
               <p>{session.user.email}</p>
               <p>{session.user.id}</p>
+              <p>Signed in as {session.user.email}</p>
+              <p>Access Token: {session.accessToken}</p>
+              <p>Refresh Token: {session.refreshToken}</p>
+              <p>Provider: {session.provider}</p>
+              <p>Provider ID: {session.providerId}</p>
             </div>
           </div>
           

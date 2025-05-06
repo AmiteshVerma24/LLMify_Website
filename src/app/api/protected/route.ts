@@ -1,17 +1,21 @@
 import { getServerSession } from 'next-auth';
 import { DefaultSession } from 'next-auth';
 import { NextResponse } from 'next/server';
+import { authOptions } from '../auth/[...nextauth]/route';
 
 declare module 'next-auth' {
   interface Session {
     user: {
       id?: string | null;
     } & DefaultSession['user'];
+    accessToken?: string | null;
+    refreshToken?: string | null;
+    provider?: string | null;
+    providerId?: string | null;
   }
 }
 
 export async function GET(request: Request) {
-  // CORS Headers - allow the extension to access this endpoint
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -19,12 +23,11 @@ export async function GET(request: Request) {
     'Access-Control-Allow-Credentials': 'true',
   };
 
-  // Handle preflight OPTIONS request
   if (request.method === 'OPTIONS') {
     return new NextResponse(null, { headers });
   }
 
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   if (!session) {
     return NextResponse.json(
@@ -34,14 +37,17 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Example: Fetch data that is specific to the logged-in user
+
     const userData = {
       message: `Hello, ${session?.user?.name}! This is protected data.`,
       userId: session?.user?.id,
       email: session?.user?.email,
       image: session?.user?.image,
       name: session?.user?.name,
-  
+      accessToken: session?.accessToken,
+      refreshToken: session?.refreshToken,
+      provider: session?.provider,
+      providerId: session?.providerId,
     }; 
     
     return NextResponse.json(userData, { 
