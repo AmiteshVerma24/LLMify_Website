@@ -7,6 +7,7 @@ import Link from 'next/link';
 export default async function Profile() {
   const session = await getServerSession(authOptions);
   
+  
   if (!session) {
     redirect('/');
   }
