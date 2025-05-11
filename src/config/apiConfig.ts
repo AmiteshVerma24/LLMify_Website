@@ -5,3 +5,8 @@ export const AUTH_ENDPOINTS = {
   EXISTS: "/users/exists",
   UPDATE: "/users/update",
 }
+
+export const USER_ACTIVITY_ENDPOINTS = {
+  USER_STATS: "/api/user-stats",
+  USER_ACTIVITY: "/api/user-activity",
+}

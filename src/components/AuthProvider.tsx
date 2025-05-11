@@ -1,19 +1,7 @@
-// 'use client';
-
-// import { SessionProvider } from 'next-auth/react';
-
-// import { ReactNode } from 'react';
-
-// export default function AuthProvider({ children }: { children: ReactNode }) {
-//   return <SessionProvider>{children}</SessionProvider>;
-// }
-
-// src/contexts/AuthContext.tsx
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import type { Session } from 'next-auth';
 
-// Define the shape of our auth context
 type AuthContextType = {
   user: {
     name?: string | null;
