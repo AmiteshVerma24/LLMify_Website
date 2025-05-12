@@ -6,6 +6,8 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+
+
 @layer base {
   :root {
     --background: 248 67% 2%;

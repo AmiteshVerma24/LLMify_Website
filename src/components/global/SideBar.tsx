@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -15,41 +14,26 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  LayoutDashboard,
 } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useAuth } from "../AuthProvider"
+import { useSidebar } from "./SidebarContext"
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isCollapsed, setIsCollapsed] = useState(false)
-
-  // Define routes where the sidebar should be hidden
-  const excludedRoutes = [
-    "/login",
-    "/register",
-    "/forgot-password",
-    "/full-screen-view",
-    "/",
-    // Add any other routes where you don't want the sidebar
-  ]
-
-  // Check if current path should exclude sidebar
-  const shouldShowSidebar = !excludedRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`))
-
-  // Try to restore user preference from localStorage
-  useEffect(() => {
-    const savedState = localStorage.getItem("sidebarCollapsed")
-    if (savedState) {
-      setIsCollapsed(savedState === "true")
-    }
-  }, [])
-
-  // Save preference when changed
-  useEffect(() => {
-    localStorage.setItem("sidebarCollapsed", isCollapsed.toString())
-  }, [isCollapsed])
+  const { isCollapsed, setIsCollapsed, isMobileMenuOpen, setIsMobileMenuOpen, shouldShowSidebar } = useSidebar()
+  const { user, isAuthenticated, isLoading, signIn, signOut, status } = useAuth()
 
   const navigation = [
     { name: "Home", href: "/", icon: Home },
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Highlights", href: "/highlights", icon: Highlighter },
     { name: "Notes", href: "/notes", icon: FileText },
     { name: "AI", href: "/ai", icon: Brain },
@@ -64,7 +48,6 @@ export default function Sidebar() {
     setIsCollapsed(!isCollapsed)
   }
 
-  // If the sidebar should be hidden for the current route, don't render anything
   if (!shouldShowSidebar) {
     return null
   }
@@ -82,9 +65,11 @@ export default function Sidebar() {
         </button>
       </div>
 
-      {/* Sidebar for desktop - FULL HEIGHT */}
-      <div 
-        className={`hidden md:flex md:h-screen bg-black z-40 transition-all duration-300 ${isCollapsed ? "w-16" : "w-64"}`}
+      {/* Sidebar for desktop - FIXED POSITION */}
+      <div
+        className={`hidden md:flex md:h-screen bg-black z-40 transition-all duration-300 ${
+          isCollapsed ? "w-16" : "w-64"
+        } fixed top-0 left-0`}
       >
         <div className="flex flex-col w-full border-r border-zinc-800">
           {/* Header with Logo */}
@@ -110,7 +95,9 @@ export default function Sidebar() {
 
             {/* Collapse toggle button */}
             <button
-              className={`hidden md:flex items-center justify-center p-1 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors ${isCollapsed ? "ml-2" : ""}`}
+              className={`hidden md:flex items-center justify-center p-1 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors ${
+                isCollapsed ? "ml-2" : ""
+              }`}
               onClick={toggleCollapse}
               aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
@@ -147,26 +134,48 @@ export default function Sidebar() {
 
           {/* User Profile Area */}
           <div className="flex-shrink-0 flex border-t border-zinc-800 p-4">
-            {isCollapsed ? (
-              <div className="mx-auto">
-                <div className="inline-block h-8 w-8 rounded-full bg-zinc-800">
-                  <User className="h-8 w-8 p-2 text-zinc-400" />
-                </div>
+            {isLoading ? (
+              <div className="flex items-center">
+                <div className="h-8 w-8 rounded-full bg-gray-700 animate-pulse"></div>
               </div>
-            ) : (
-              <div className="flex-shrink-0 w-full group block">
-                <div className="flex items-center">
-                  <div className="inline-block h-9 w-9 rounded-full bg-zinc-800">
-                    <User className="h-9 w-9 p-2 text-zinc-400" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-white">Alex Johnson</p>
-                    <div className="flex items-center space-x-2">
-                      <p className="text-xs font-medium text-zinc-400 group-hover:text-zinc-300">View profile</p>
-                      <LogOut className="h-3 w-3 text-zinc-400 group-hover:text-zinc-300" />
+            ) : isAuthenticated ? (
+              isCollapsed ? (
+                <div className="mx-auto">
+                  <img
+                    src={user?.image || "https://via.placeholder.com/150"}
+                    alt="User avatar"
+                    className="h-8 w-8 rounded-full bg-zinc-700"
+                  />
+                </div>
+              ) : (
+                <div className="flex-shrink-0 w-full group block">
+                  <div className="flex items-center">
+                    <img
+                      src={user?.image || "https://via.placeholder.com/150"}
+                      alt="User avatar"
+                      className="h-9 w-9 rounded-full bg-zinc-700"
+                    />
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-white">{user?.name}</p>
+                      <div className="flex items-center space-x-2">
+                        <p className="text-xs font-medium text-zinc-400 group-hover:text-zinc-300">View profile</p>
+                        <div className="cursor-pointer" onClick={() => signOut()}>
+                          <LogOut className="h-3 w-3 text-zinc-400 group-hover:text-zinc-300" />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
+              )
+            ) : (
+              <div className="w-full">
+                <button
+                  onClick={() => signIn()}
+                  className="w-full px-3 py-1.5 rounded text-sm bg-zinc-800 text-white font-medium 
+                          hover:bg-zinc-700 transition-colors"
+                >
+                  Sign In
+                </button>
               </div>
             )}
           </div>
@@ -219,20 +228,40 @@ export default function Sidebar() {
               </nav>
             </div>
             <div className="flex-shrink-0 flex border-t border-zinc-800 p-4">
-              <div className="flex-shrink-0 w-full group block">
+              {isLoading ? (
                 <div className="flex items-center">
-                  <div className="inline-block h-10 w-10 rounded-full bg-zinc-800">
-                    <User className="h-10 w-10 p-2 text-zinc-400" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-base font-medium text-white">Alex Johnson</p>
-                    <div className="flex items-center space-x-2">
-                      <p className="text-sm font-medium text-zinc-400 group-hover:text-zinc-300">View profile</p>
-                      <LogOut className="h-4 w-4 text-zinc-400 group-hover:text-zinc-300" />
+                  <div className="h-10 w-10 rounded-full bg-gray-700 animate-pulse"></div>
+                </div>
+              ) : isAuthenticated ? (
+                <div className="flex-shrink-0 w-full group block">
+                  <div className="flex items-center">
+                    <img
+                      src={user?.image || "https://via.placeholder.com/150"}
+                      alt="User avatar"
+                      className="h-10 w-10 rounded-full bg-zinc-700"
+                    />
+                    <div className="ml-3">
+                      <p className="text-base font-medium text-white">{user?.name}</p>
+                      <div className="flex items-center space-x-2">
+                        <p className="text-sm font-medium text-zinc-400 group-hover:text-zinc-300">View profile</p>
+                        <div className="cursor-pointer" onClick={() => signOut()}>
+                          <LogOut className="h-4 w-4 text-zinc-400 group-hover:text-zinc-300" />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="w-full">
+                  <button
+                    onClick={() => signIn()}
+                    className="w-full px-3 py-2 rounded text-sm bg-zinc-800 text-white font-medium 
+                            hover:bg-zinc-700 transition-colors"
+                  >
+                    Sign In
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
