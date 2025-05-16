@@ -10,3 +10,8 @@ export const USER_ACTIVITY_ENDPOINTS = {
   USER_STATS: "/api/user-stats",
   USER_ACTIVITY: "/api/user-activity",
 }
+
+export const NOTES_ENDPOINTS = {
+  GET_ALL_NOTES: "/api/all-notes",
+  GET_NOTE: "/api/notes",
+}

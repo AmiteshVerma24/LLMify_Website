@@ -13,6 +13,7 @@ const userActivityService = {
     },
     activity: async (type?: string, limit?: number, days?: number) => {
         try {
+            
             const response = await axiosInstance.get(USER_ACTIVITY_ENDPOINTS.USER_ACTIVITY, {
                 params: {
                     limit,

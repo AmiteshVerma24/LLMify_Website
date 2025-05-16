@@ -91,14 +91,15 @@ export function NavBar() {
             <div className="flex items-center">
               <DropdownMenu>
                 <DropdownMenuTrigger className="text-white flex items-center space-x-2 p-2 rounded-md hover:bg-zinc-800 transition-colors">
-                  {!isLoading && (
+                  {user?.image ? (
                     <img
-                      src={user?.image || "https://via.placeholder.com/150"}
+                      src={user?.image}
                       alt="User avatar"
                       className="h-8 w-8 rounded-full bg-zinc-700"
                     />
-                  )
-                  }
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-zinc-700"></div>
+                  )}
                   <span className="hidden md:block text-sm font-medium">{user?.name}</span>
                   <ChevronDown className="h-4 w-4 text-zinc-400" />
                 </DropdownMenuTrigger>
@@ -176,11 +177,15 @@ export function NavBar() {
               <div className="h-8 w-8 rounded-full bg-gray-700 animate-pulse"></div>
             ) : isAuthenticated ? (
               <div className="flex flex-col items-center">
-                <img
-                  src={user?.image || "https://via.placeholder.com/150"}
-                  alt="User avatar"
-                  className="h-12 w-12 rounded-full bg-zinc-700 mb-2"
-                />
+                {user?.image ? (
+                    <img
+                      src={user?.image}
+                      alt="User avatar"
+                      className="h-8 w-8 rounded-full bg-zinc-700"
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-zinc-700"></div>
+                  )}
                 <p className="text-white font-medium mb-1">{user?.name}</p>
                 <p className="text-zinc-400 text-sm mb-4">{user?.email}</p>
 

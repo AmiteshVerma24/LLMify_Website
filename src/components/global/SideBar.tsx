@@ -141,11 +141,15 @@ export default function Sidebar() {
             ) : isAuthenticated ? (
               isCollapsed ? (
                 <div className="mx-auto">
-                  <img
-                    src={user?.image || "https://via.placeholder.com/150"}
-                    alt="User avatar"
-                    className="h-8 w-8 rounded-full bg-zinc-700"
-                  />
+                  {user?.image ? (
+                    <img
+                      src={user?.image}
+                      alt="User avatar"
+                      className="h-8 w-8 rounded-full bg-zinc-700"
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-zinc-700"></div>
+                  )}
                 </div>
               ) : (
                 <div className="flex-shrink-0 w-full group block">
@@ -235,11 +239,15 @@ export default function Sidebar() {
               ) : isAuthenticated ? (
                 <div className="flex-shrink-0 w-full group block">
                   <div className="flex items-center">
+                    {user?.image ? (
                     <img
-                      src={user?.image || "https://via.placeholder.com/150"}
+                      src={user?.image}
                       alt="User avatar"
-                      className="h-10 w-10 rounded-full bg-zinc-700"
+                      className="h-8 w-8 rounded-full bg-zinc-700"
                     />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-zinc-700"></div>
+                  )}
                     <div className="ml-3">
                       <p className="text-base font-medium text-white">{user?.name}</p>
                       <div className="flex items-center space-x-2">
