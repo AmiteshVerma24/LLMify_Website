@@ -15,3 +15,9 @@ export const NOTES_ENDPOINTS = {
   GET_ALL_NOTES: "/api/all-notes",
   GET_NOTE: "/api/notes",
 }
+
+export const GROUPS_ENDPOINTS = {
+  GET_ALL_GROUPS: "/api/groups",
+  SAVE_NEW_GROUP: "/api/groups/new",
+  UPDATE_GROUP: "/api/groups/update",
+}

@@ -14,6 +14,7 @@ import {
 import Image from "next/image"
 import notesService from "@/services/notesService"
 import { extractMainWebsite } from "@/utils/helperMethods"
+import NoteDetailCard from "@/components/Notes/note-detail-card"
 
 // Mock data for notes
 const mockNotes = [
@@ -22,7 +23,6 @@ const mockNotes = [
     userNote: "User's annotation",
     text: "Highlighted text",
     website: "example.com",
-    timestamp: "2025-05-12T14:41:01.607Z", // Timestamp in ISO format
     tags: ["highlight", "annotation"],
     color: "#FFFF00", // Highlight color
     textColor: "#000000", // Text color
@@ -48,6 +48,18 @@ export default function NotesGrid({ id }: NotesGridProps) {
   const [domain, setDomain] = useState<string | null>(null);
   const [website, setWebsite] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const [selectedNote, setSelectedNote] = useState<(typeof mockNotes)[0] | null>(null)
+  const [isDetailOpen, setIsDetailOpen] = useState(false)
+
+  const openNoteDetail = (note: (typeof mockNotes)[0]) => {
+    setSelectedNote(note)
+    setIsDetailOpen(true)
+  }
+
+  const closeNoteDetail = () => {
+    setIsDetailOpen(false)
+  }
 
   useEffect(() => {
     const fetchUserNotes = async () => {
@@ -111,7 +123,8 @@ export default function NotesGrid({ id }: NotesGridProps) {
           
           <div
             key={note.uuid}
-            className="group relative overflow-hidden rounded-xl bg-zinc-800/70 backdrop-blur-sm transition-all hover:bg-zinc-800 hover:shadow-lg"
+            className="group relative overflow-hidden rounded-xl bg-zinc-800/70 backdrop-blur-sm transition-all hover:bg-zinc-800 hover:shadow-lg cursor-pointer"
+            onClick={() => openNoteDetail(note)}
           >
             <div className="p-6 space-y-4">
               {/* Highlight */}
@@ -155,7 +168,7 @@ export default function NotesGrid({ id }: NotesGridProps) {
                   <DialogContent className="sm:max-w-[600px] bg-zinc-900 border-zinc-700">
                     <DialogHeader>
                       <DialogTitle>Screenshot from {note.website}</DialogTitle>
-                      <DialogDescription className="text-zinc-400">{note.timestamp}</DialogDescription>
+                      <DialogDescription className="text-zinc-400">{note.updatedAt}</DialogDescription>
                     </DialogHeader>
                     <div className="mt-4">
                       <img
@@ -215,6 +228,10 @@ export default function NotesGrid({ id }: NotesGridProps) {
                   <span className="sr-only">Delete</span>
                 </Button>
               </div>
+
+              <div className="absolute inset-0 bg-zinc-900/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <Button className="bg-violet-600 hover:bg-violet-700">View Details</Button>
+              </div>
             </div>
             <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-violet-500 to-violet-300 opacity-70"></div>
           </div>
@@ -252,6 +269,7 @@ export default function NotesGrid({ id }: NotesGridProps) {
           <p>{error}</p>
         </div>
       )}
+      {selectedNote && <NoteDetailCard note={selectedNote} isOpen={isDetailOpen} onClose={closeNoteDetail} />}
     </section>
   );
 }

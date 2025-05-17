@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import NotesGrid from "@/components/Notes/NotesGrid"
+import NotesGrid from "@/components/Notes/note-grid"
 
 
 export default async function NotesSitePage({ params }: { params: { id: string } }) {

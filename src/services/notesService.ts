@@ -9,7 +9,6 @@ const notesService = {
             const response = await axiosInstance.get(`${NOTES_ENDPOINTS.GET_ALL_NOTES}`);
             console.log("API Response status:", response.status);
             console.log("API Response data:", response.data);
-            
             return response.data;
         } catch (error) {
             console.error("Error fetching notes:", error);

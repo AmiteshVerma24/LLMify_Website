@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Search, Calendar, FileText, ExternalLink, ArrowUpRight, Filter, SortAsc, Loader2 } from "lucide-react"
+import { Search, Calendar, FileText, ExternalLink, ArrowUpRight, Filter, SortAsc, Loader2, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import notesService from "@/services/notesService"
 import { useAuth } from "@/components/AuthProvider"
+import { getColorClasses } from "@/utils/helperMethods"
 
 interface Website {
   url: string
@@ -27,7 +28,10 @@ export default function NotesSitesList() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [websites, setWebsites] = useState<Website[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
   const { user, isLoading: isUserLoading } = useAuth()
+  
+  const itemsPerPage = 12
 
   useEffect(() => {
     const fetchUserNotes = async () => {
@@ -37,7 +41,7 @@ export default function NotesSitesList() {
         setIsLoading(true)
         setError(null)
         const response = await notesService.getNotes()
-        
+
         if (response && Array.isArray(response.notes)) {
           setWebsites(response.notes)
         } else if (response && response.notes === undefined) {
@@ -73,80 +77,68 @@ export default function NotesSitesList() {
     }
   }, [user, isUserLoading])
 
+  // Reset to first page when search/filter/sort changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, sortBy, filterBy])
+
   // Filter websites based on search query
-  const filteredWebsites = websites.filter(
-    (website) =>
-      website.url.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      website.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      website.description.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+  const getFilteredWebsites = () => {
+    let filtered = websites.filter(
+      (website) =>
+        website.url.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        website.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        website.description.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
+
+    // Apply filter
+    if (filterBy === "recent") {
+      // Filter websites updated in the last 7 days
+      const weekAgo = new Date()
+      weekAgo.setDate(weekAgo.getDate() - 7)
+      filtered = filtered.filter(website => new Date(website.last_updated) > weekAgo)
+    } else if (filterBy === "most") {
+      // Filter websites with more than average notes
+      const avgNotes = websites.reduce((sum, site) => sum + site.notes_count, 0) / websites.length
+      filtered = filtered.filter(website => website.notes_count > avgNotes)
+    }
+
+    return filtered
+  }
 
   // Sort websites based on sort option
-  const sortedWebsites = [...filteredWebsites].sort((a, b) => {
-    if (sortBy === "recent") {
-      return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime()
-    } else if (sortBy === "notes") {
-      return b.notes_count - a.notes_count
-    } else if (sortBy === "alphabetical") {
-      return a.title.localeCompare(b.title)
+  const getSortedWebsites = (filtered: Website[]) => {
+    return [...filtered].sort((a, b) => {
+      if (sortBy === "recent") {
+        return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime()
+      } else if (sortBy === "notes") {
+        return b.notes_count - a.notes_count
+      } else if (sortBy === "alphabetical") {
+        return a.title.localeCompare(b.title)
+      }
+      return 0
+    })
+  }
+
+  // Get paginated websites
+  const getPaginatedWebsites = () => {
+    const filtered = getFilteredWebsites()
+    const sorted = getSortedWebsites(filtered)
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return {
+      websites: sorted.slice(startIndex, endIndex),
+      totalCount: sorted.length,
+      totalPages: Math.ceil(sorted.length / itemsPerPage)
     }
-    return 0
-  })
+  }
+
+  const { websites: paginatedWebsites, totalCount, totalPages } = getPaginatedWebsites()
 
   // Navigate to website notes page
-  // In your navigation component
   const navigateToWebsiteNotes = (websiteUrl: string) => {
-  const encoded = btoa(websiteUrl) // Base64 encode
-  router.push(`/notes/site/${encoded}`)
-}
-
-  // Get color class based on website (you can customize this logic)
-  const getColorClasses = (url: string) => {
-    const colorMap: Record<string, { border: string; bg: string; text: string; glow: string }> = {
-      violet: {
-        border: "border-violet-500/30",
-        bg: "bg-violet-500/10",
-        text: "text-violet-400",
-        glow: "after:bg-gradient-to-r after:from-violet-500 after:to-violet-300",
-      },
-      sky: {
-        border: "border-sky-500/30",
-        bg: "bg-sky-500/10",
-        text: "text-sky-400",
-        glow: "after:bg-gradient-to-r after:from-sky-500 after:to-sky-300",
-      },
-      emerald: {
-        border: "border-emerald-500/30",
-        bg: "bg-emerald-500/10",
-        text: "text-emerald-400",
-        glow: "after:bg-gradient-to-r after:from-emerald-500 after:to-emerald-300",
-      },
-      amber: {
-        border: "border-amber-500/30",
-        bg: "bg-amber-500/10",
-        text: "text-amber-400",
-        glow: "after:bg-gradient-to-r after:from-amber-500 after:to-amber-300",
-      },
-      rose: {
-        border: "border-rose-500/30",
-        bg: "bg-rose-500/10",
-        text: "text-rose-400",
-        glow: "after:bg-gradient-to-r after:from-rose-500 after:to-rose-300",
-      },
-      indigo: {
-        border: "border-indigo-500/30",
-        bg: "bg-indigo-500/10",
-        text: "text-indigo-400",
-        glow: "after:bg-gradient-to-r after:from-indigo-500 after:to-indigo-300",
-      },
-    }
-
-    // Simple hash function to assign colors based on domain
-    const colors = Object.keys(colorMap)
-    const hash = url.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-    const colorKey = colors[hash % colors.length]
-    
-    return colorMap[colorKey]
+    const encoded = btoa(websiteUrl) // Base64 encode
+    router.push(`/notes/site/${encoded}`)
   }
 
   // Format relative time
@@ -215,56 +207,87 @@ export default function NotesSitesList() {
             placeholder="Search websites..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-zinc-800 border-zinc-700 focus-visible:ring-violet-500"
+            className="pl-10 bg-zinc-800 border-zinc-700 focus-visible:ring-violet-500 text-zinc-300"
           />
         </div>
 
         <div className="flex gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700">
+              <Button variant="outline" className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-zinc-300">
                 <Filter className="mr-2 h-4 w-4" />
-                Filter
+                <span>Filter: {filterBy === "all" ? "All" : filterBy === "recent" ? "Recent" : "Most Notes"}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-zinc-800 border-zinc-700">
-              <DropdownMenuItem className="hover:bg-zinc-700 cursor-pointer" onClick={() => setFilterBy("all")}>
+            <DropdownMenuContent align="end" className="w-56 bg-zinc-800 border-zinc-700 text-zinc-300">
+              <DropdownMenuItem 
+                className="hover:bg-zinc-700 cursor-pointer" 
+                onClick={() => setFilterBy("all")}
+              >
                 <span>All Websites</span>
+                {filterBy === "all" && <span className="ml-auto text-violet-400">✓</span>}
               </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-zinc-700 cursor-pointer" onClick={() => setFilterBy("recent")}>
+              <DropdownMenuItem 
+                className="hover:bg-zinc-700 cursor-pointer" 
+                onClick={() => setFilterBy("recent")}
+              >
                 <span>Recently Updated</span>
+                {filterBy === "recent" && <span className="ml-auto text-violet-400">✓</span>}
               </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-zinc-700 cursor-pointer" onClick={() => setFilterBy("most")}>
+              <DropdownMenuItem 
+                className="hover:bg-zinc-700 cursor-pointer" 
+                onClick={() => setFilterBy("most")}
+              >
                 <span>Most Notes</span>
+                {filterBy === "most" && <span className="ml-auto text-violet-400">✓</span>}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700">
+              <Button variant="outline" className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-zinc-300">
                 <SortAsc className="mr-2 h-4 w-4" />
-                Sort
+                <span>Sort: {sortBy === "recent" ? "Recent" : sortBy === "notes" ? "Notes" : "A-Z"}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-zinc-800 border-zinc-700">
-              <DropdownMenuItem className="hover:bg-zinc-700 cursor-pointer" onClick={() => setSortBy("recent")}>
+            <DropdownMenuContent align="end" className="w-56 bg-zinc-800 border-zinc-700 text-zinc-300">
+              <DropdownMenuItem 
+                className="hover:bg-zinc-700 cursor-pointer" 
+                onClick={() => setSortBy("recent")}
+              >
                 <span>Most Recent</span>
+                {sortBy === "recent" && <span className="ml-auto text-violet-400">✓</span>}
               </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-zinc-700 cursor-pointer" onClick={() => setSortBy("notes")}>
+              <DropdownMenuItem 
+                className="hover:bg-zinc-700 cursor-pointer" 
+                onClick={() => setSortBy("notes")}
+              >
                 <span>Most Notes</span>
+                {sortBy === "notes" && <span className="ml-auto text-violet-400">✓</span>}
               </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-zinc-700 cursor-pointer" onClick={() => setSortBy("alphabetical")}>
+              <DropdownMenuItem 
+                className="hover:bg-zinc-700 cursor-pointer" 
+                onClick={() => setSortBy("alphabetical")}
+              >
                 <span>Alphabetical</span>
+                {sortBy === "alphabetical" && <span className="ml-auto text-violet-400">✓</span>}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
 
+      {/* Results summary */}
+      {!isLoading && totalCount > 0 && (
+        <div className="mb-4 text-sm text-zinc-400">
+          Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} results
+        </div>
+      )}
+
       {/* Websites grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sortedWebsites.map((website, index) => {
+        {paginatedWebsites.map((website, index) => {
           const colorClasses = getColorClasses(website.url)
           const domain = extractDomain(website.url)
 
@@ -347,8 +370,69 @@ export default function NotesSitesList() {
         })}
       </div>
 
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-8">
+          <Button
+            variant="outline"
+            className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-zinc-300"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Previous
+          </Button>
+          
+          <div className="flex items-center gap-1">
+            {[...Array(totalPages)].map((_, i) => {
+              const pageNum = i + 1
+              const isActive = pageNum === currentPage
+              
+              // Show first page, last page, current page, and surrounding pages
+              if (
+                pageNum === 1 ||
+                pageNum === totalPages ||
+                (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+              ) {
+                return (
+                  <Button
+                    key={pageNum}
+                    variant={isActive ? "default" : "outline"}
+                    size="sm"
+                    className={
+                      isActive
+                        ? "bg-violet-600 text-white"
+                        : "bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-zinc-300"
+                    }
+                    onClick={() => setCurrentPage(pageNum)}
+                  >
+                    {pageNum}
+                  </Button>
+                )
+              } else if (
+                (pageNum === currentPage - 2 && currentPage > 3) ||
+                (pageNum === currentPage + 2 && currentPage < totalPages - 2)
+              ) {
+                return <span key={pageNum} className="text-zinc-500">...</span>
+              }
+              return null
+            })}
+          </div>
+          
+          <Button
+            variant="outline"
+            className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-zinc-300"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+          >
+            Next
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
+      )}
+
       {/* Empty state */}
-      {sortedWebsites.length === 0 && !isLoading && (
+      {paginatedWebsites.length === 0 && !isLoading && (
         <div className="flex flex-col items-center justify-center rounded-xl bg-zinc-800/50 p-12 text-center">
           <div className="rounded-full bg-zinc-700/50 p-4">
             <FileText className="h-10 w-10 text-zinc-500" />
@@ -358,12 +442,27 @@ export default function NotesSitesList() {
           </h3>
           <p className="mt-2 text-zinc-400">
             {searchQuery 
-              ? "Try adjusting your search query." 
+              ? "Try adjusting your search query or filter settings." 
               : "Create notes on websites to get started."}
           </p>
-          <Button className="mt-6 bg-violet-600 hover:bg-violet-700">
-            {searchQuery ? "Clear Search" : "Install Browser Extension"}
-          </Button>
+          <div className="mt-6 flex gap-3">
+            {searchQuery && (
+              <Button 
+                variant="outline"
+                className="bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-zinc-300"
+                onClick={() => {
+                  setSearchQuery("")
+                  setFilterBy("all")
+                  setSortBy("recent")
+                }}
+              >
+                Clear Filters
+              </Button>
+            )}
+            <Button className="bg-violet-600 hover:bg-violet-700">
+              Install Browser Extension
+            </Button>
+          </div>
         </div>
       )}
     </div>
