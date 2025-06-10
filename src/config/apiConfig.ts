@@ -4,6 +4,7 @@ export const AUTH_ENDPOINTS = {
   SIGNUP: "/users/signup",
   EXISTS: "/users/exists",
   UPDATE: "/users/update",
+  EXTENSION_SYNC: "/users/extension-sync",
 }
 
 export const USER_ACTIVITY_ENDPOINTS = {

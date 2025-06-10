@@ -12,6 +12,13 @@ interface SignupData {
     subscription_plan?: string;
   }
 
+interface ExtensionSyncData {
+    "email": string;
+    "name": string;
+    "extensionId": string;
+    "instanceId": string;
+}
+
 const authService = {
     signup: async (data: SignupData) => {
         try {
@@ -44,6 +51,15 @@ const authService = {
             return response.data;
         } catch (error) {
             console.error("Error during update:", error);
+            throw error;
+        }
+    },
+    extensionSync: async (data: ExtensionSyncData) => {
+        try {
+            const response = await axiosInstance.post(AUTH_ENDPOINTS.EXTENSION_SYNC, data);
+            return response.data;
+        } catch (error) {
+            console.error("Error during extension sync:", error);
             throw error;
         }
     }

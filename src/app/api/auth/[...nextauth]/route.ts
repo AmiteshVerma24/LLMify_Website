@@ -2,7 +2,8 @@ import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import type { User, Account, Profile } from 'next-auth';
 import authService from '@/services/authService';
-import { signOut } from 'next-auth/react';
+// import cookieService from '@/services/jwtService';
+
 
 export const authOptions = {
   providers: [
@@ -15,7 +16,7 @@ export const authOptions = {
           access_type: 'offline', 
           prompt: 'consent', 
         },
-      },
+      }
     }),
   ],
   callbacks: {
@@ -30,7 +31,6 @@ export const authOptions = {
         token.providerId = account.id;
         token.exp = account.expires_at || Math.floor(Date.now() / 1000) + 3600;
       }
-
       return token;
     },
     async session({ session, token }: { session: any; token: any }) {
@@ -84,27 +84,31 @@ export const authOptions = {
           // If the user already exists, update the user data
           if (response.exists) {
             console.log("User already exists");
-            authService.update(userData, email || "")
-            .then((response) => {
-              console.log("User updated successfully", response);
-            })
-            .catch((error) => {
-              console.error("Error updating user:", error);
-            });
+            return authService.update(userData, email || "");
           // If the user does not exist, create a new user
           } else {
-            authService.signup(userData)
-            .then((response) => {
-              console.log("User signed up successfully", response);
-            })
-            .catch((error) => {
-              console.error("Error signing up user:", error);
-            });
+            return authService.signup(userData);
           }
         })
-        
+        .then(() => {
+          // Sync extension data after sign in
+          return authService.extensionSync({
+              email: user.email || "",
+              name: user.name || "",
+              extensionId: "your-extension-id", // Replace with your actual extension ID
+              instanceId: "your-instance-id" // Replace with your actual instance ID
+            })  
+        })
+        .then((response) => {
+          console.log("Extension sync successful", response);
+          // cookieService.setUser(response.user);
+          // cookieService.setAccessToken(response.accessToken);
+          // cookieService.setRefreshToken(response.refreshToken);
+        })
+        .catch((error) => {
+          console.error("Error checking if user exists:", error);
+        } );     
       }
-      
     }
   },
  

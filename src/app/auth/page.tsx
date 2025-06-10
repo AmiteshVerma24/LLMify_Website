@@ -4,16 +4,15 @@ import React from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import authService from '@/services/authService';
+// import authService from '@/services/authService'; 
+
 
 export default function Auth() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  const extension = searchParams.get('extension');
-  const extensionId = searchParams.get('extensionId') || 'phnekldbpcdigeodkjipkbfoegdbgefm';
-  const state = searchParams.get('state');
+  const extensionId = searchParams.get('extensionId') || 'ajmdlkeecbgnjooecofbcbfkigehipel';
   
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -28,55 +27,66 @@ export default function Auth() {
   
   // Send message to extension when authenticated
   useEffect(() => {
-    const authData = {
-      type: "AUTH_SUCCESS",
-      user: session?.user,
-      accessToken: session?.accessToken,
-      refreshToken: session?.refreshToken,
-      provider: session?.provider,
-      providerId: session?.providerId,
-      
-      timestamp: Date.now()
-    };
-    console.log("Auth data:", authData);
-    if (session && session.user) {
+    async function extensionAuth() {
+      if (!session || !session.user) {
+        setError("Authentication failed. Please try again.");
+        return;
+      }
       try {
-        // Method 1: Try direct communication with extension API
-        if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
-          console.log("Attempting direct chrome.runtime.sendMessage");
-          chrome.runtime.sendMessage(
-            extensionId,
-            authData,
-            (response) => {
-              if (chrome.runtime.lastError) {
-                console.error("Extension messaging error:", chrome.runtime.lastError);
-                setMessage("Using alternative authentication method");
-                sendViaPostMessage();
-              } else {
-                console.log("Direct extension response:", response);
-                setSuccess(true);
-                setMessage("Authentication successful! Redirecting...");
-                setTimeout(() => router.push("/"), 1500);
+        if (!session.user.email || !session.user.name) {
+          setError("User email or name is not available. Please ensure you are logged in.");
+          return;
+        }
+        const data = {
+          type: "AUTH_SUCCESS",
+          user: session.user,
+          accessToken: session.accessToken,
+          refreshToken: session.refreshToken,
+          provider: session?.provider,
+          providerId: session?.providerId,
+          timestamp: Date.now()
+        };
+
+        setMessage("Sending authentication data to the extension...");
+         try {
+          // Method 1: Try direct communication with extension API
+          if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
+            console.log("Attempting direct chrome.runtime.sendMessage");
+            chrome.runtime.sendMessage(
+              extensionId,
+              data,
+              (response) => {
+                if (chrome.runtime.lastError) {
+                  console.error("Extension messaging error:", chrome.runtime.lastError);
+                  setMessage("Using alternative authentication method");
+                  sendViaPostMessage(data);
+                } else {
+                  console.log("Direct extension response:", response);
+                  setSuccess(true);
+                  setMessage("Authentication successful! Redirecting...");
+                  setTimeout(() => router.push("/"), 1500);
+                }
               }
-            }
-          );
-        } else {
-          console.log("chrome.runtime not available, using postMessage");
-          setMessage("Using alternative authentication method");
-          sendViaPostMessage();
+            );
+          } else {
+            console.log("chrome.runtime not available, using postMessage");
+            setMessage("Using alternative authentication method");
+            sendViaPostMessage(data);
+          }
+        } catch (error) {
+          console.error("Error in authentication process:", error);
+          setMessage("Using fallback authentication method");
+          sendViaPostMessage(data);
         }
       } catch (error) {
-        console.error("Error in authentication process:", error);
-        setMessage("Using fallback authentication method");
-        sendViaPostMessage();
+        console.error("Error during authentication:", error);
+        setError("An unexpected error occurred. Please try again.");
       }
     }
     
-    function sendViaPostMessage() {
+    function sendViaPostMessage(authData: any) {
       try {
-        // Store in localStorage for potential retrieval by the extension
         localStorage.setItem("extensionAuthData", JSON.stringify(authData));
-        
         // Send via postMessage
         window.postMessage({
           target: "CHROME_EXTENSION",
@@ -94,6 +104,11 @@ export default function Auth() {
         setError("Authentication failed. Please try again.");
       }
     }
+
+    if (session && session.user) {
+      extensionAuth();
+    }
+
   }, [session, router, extensionId]);
   
   if (status === 'loading') {

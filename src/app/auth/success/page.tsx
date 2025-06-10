@@ -52,8 +52,8 @@ export default function AuthSuccess() {
     <div className="flex items-center justify-center min-h-screen text-white">
       <div className="text-center p-8 max-w-md">
         <h1 className="text-2xl font-bold mb-4">Authentication Successful</h1>
-        <p>You've been authenticated! This tab will close automatically in a moment...</p>
-        <p className="text-sm  mt-4">If the tab doesn't close, you can close it manually.</p>
+        <p>Youve been authenticated! This tab will close automatically in a moment...</p>
+        <p className="text-sm  mt-4">If the tab doesnt close, you can close it manually.</p>
       </div>
     </div>
   );

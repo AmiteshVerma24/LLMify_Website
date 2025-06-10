@@ -1,4 +1,4 @@
-import { get } from "http";
+
 import axiosInstance from "../utils/axiosInstance";
 import { NOTES_ENDPOINTS } from "@/config/apiConfig";
 

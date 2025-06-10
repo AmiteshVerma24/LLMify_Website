@@ -33,6 +33,7 @@ export default function NotesSitesList() {
   
   const itemsPerPage = 12
 
+  // Fetch notes of user
   useEffect(() => {
     const fetchUserNotes = async () => {
       if (!user || isUserLoading) return
@@ -70,8 +71,7 @@ export default function NotesSitesList() {
       } finally {
         setIsLoading(false)
       }
-    }
-    
+    } 
     if (!isUserLoading) {
       fetchUserNotes()
     }
