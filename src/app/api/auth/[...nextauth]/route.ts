@@ -90,21 +90,21 @@ export const authOptions = {
             return authService.signup(userData);
           }
         })
-        .then(() => {
-          // Sync extension data after sign in
-          return authService.extensionSync({
-              email: user.email || "",
-              name: user.name || "",
-              extensionId: "your-extension-id", // Replace with your actual extension ID
-              instanceId: "your-instance-id" // Replace with your actual instance ID
-            })  
-        })
-        .then((response) => {
-          console.log("Extension sync successful", response);
-          // cookieService.setUser(response.user);
-          // cookieService.setAccessToken(response.accessToken);
-          // cookieService.setRefreshToken(response.refreshToken);
-        })
+        // .then(() => {
+        //   // Sync extension data after sign in
+        //   return authService.extensionSync({
+        //       email: user.email || "",
+        //       name: user.name || "",
+        //       extensionId: "your-extension-id", // Replace with your actual extension ID
+        //       instanceId: "your-instance-id" // Replace with your actual instance ID
+        //     })  
+        // })
+        // .then((response) => {
+        //   console.log("Extension sync successful", response);
+        //   // cookieService.setUser(response.user);
+        //   // cookieService.setAccessToken(response.accessToken);
+        //   // cookieService.setRefreshToken(response.refreshToken);
+        // })
         .catch((error) => {
           console.error("Error checking if user exists:", error);
         } );     

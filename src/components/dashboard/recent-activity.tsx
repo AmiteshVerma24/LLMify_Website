@@ -75,10 +75,10 @@ export default function RecentActivity() {
         LIMIT
       )
       
-      if (response.success) {
+      if (response.success && response.activities) {
+        console.log("Fetched activities:", response.activities)
         // Store the fetched activities
         setAllActivities(response.activities)
-        
         // Check if there are more activities to load based on count
         setHasMore(response.count > LIMIT)
       }
