@@ -3,6 +3,8 @@ import GoogleProvider from 'next-auth/providers/google';
 import type { User, Account, Profile } from 'next-auth';
 import authService from '@/services/authService';
 // import cookieService from '@/services/jwtService';
+import Cookies from 'js-cookie';
+import { signOut } from 'next-auth/react';
 
 
 export const authOptions = {
@@ -89,26 +91,19 @@ export const authOptions = {
           } else {
             return authService.signup(userData);
           }
-        })
-        // .then(() => {
-        //   // Sync extension data after sign in
-        //   return authService.extensionSync({
-        //       email: user.email || "",
-        //       name: user.name || "",
-        //       extensionId: "your-extension-id", // Replace with your actual extension ID
-        //       instanceId: "your-instance-id" // Replace with your actual instance ID
-        //     })  
-        // })
-        // .then((response) => {
-        //   console.log("Extension sync successful", response);
-        //   // cookieService.setUser(response.user);
-        //   // cookieService.setAccessToken(response.accessToken);
-        //   // cookieService.setRefreshToken(response.refreshToken);
-        // })
+        }) 
         .catch((error) => {
           console.error("Error checking if user exists:", error);
         } );     
       }
+    },
+    async signOut() {
+      console.log("Clearing tokens!");
+      Cookies.remove('accessToken');
+      Cookies.remove('refreshToken');
+      Cookies.remove('user');
+      await signOut({ redirect: false });
+
     }
   },
  

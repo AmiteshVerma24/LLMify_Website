@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 export default function SignOutPage() {
   const router = useRouter();
@@ -42,6 +43,9 @@ export default function SignOutPage() {
     try {
       setIsLoading(true);
       setError("");
+      Cookies.remove('user');
+      Cookies.remove('accessToken');
+      Cookies.remove('refreshToken');
 
       notifyExtension();
     
@@ -78,7 +82,7 @@ export default function SignOutPage() {
             disabled={isLoading}
             className="rounded bg-red-600 px-4 py-2 font-bold text-white hover:bg-red-700 disabled:opacity-50"
           >
-            {isLoading ? "Signing out..." : "Yes, Sign me out"}
+            {isLoading ? "Signing out..." : "Yes, Sign me out!"}
           </button>
           <button
             onClick={handleCancel}

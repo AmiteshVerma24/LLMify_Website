@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
-import type { Session } from 'next-auth';
+import Cookies from 'js-cookie';
 
 type AuthContextType = {
   user: {
@@ -31,6 +31,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const [user, setUser] = useState<AuthContextType['user']>(null);
 
+   const handleSignOut = async () => {
+    try {
+      // Add your custom logic here
+      console.log('User signing out...');
+      
+      Cookies.remove('user');
+      Cookies.remove('accessToken');
+      Cookies.remove('refreshToken');
+      await signOut();
+      console.log('Sign out completed');
+    } catch (error) {
+      console.error('Error during sign out:', error);
+    }
+  };
+
   useEffect(() => {
     if (session?.user) {
       setUser({
@@ -50,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: status === 'authenticated',
     isLoading: status === 'loading',
     signIn,
-    signOut
+    signOut: handleSignOut
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
