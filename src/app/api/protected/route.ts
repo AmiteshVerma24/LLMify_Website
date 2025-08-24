@@ -2,6 +2,8 @@ import { getServerSession } from 'next-auth';
 import { DefaultSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import { authOptions } from '../auth/[...nextauth]/route';
+import { cookies } from 'next/headers'
+
 
 declare module 'next-auth' {
   interface Session {
@@ -35,8 +37,10 @@ export async function GET(request: Request) {
       { status: 401, headers }
     );
   }
-
   try {
+    const cookieStore = cookies();
+    const backendAccessToken = (await cookieStore).get('accessToken')?.value || null;
+    const backendRefreshToken = (await cookieStore).get('refreshToken')?.value || null;
 
     const userData = {
       message: `Hello, ${session?.user?.name}! This is protected data.`,
@@ -48,7 +52,11 @@ export async function GET(request: Request) {
       refreshToken: session?.refreshToken,
       provider: session?.provider,
       providerId: session?.providerId,
-    }; 
+      backendAccessToken: backendAccessToken,
+      backendRefreshToken: backendRefreshToken,
+    };
+
+    console.log('Protected data fetched successfully:', userData);
     
     return NextResponse.json(userData, { 
       status: 200,
